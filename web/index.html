@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!-- lang is the default locale and is corrected by applyLocale() as soon as the
+     scripts run, from the player's stored choice or their browser's stated
+     preference. The English text below is the pre-script fallback. -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="app.name">Xiangqi</title>
+<!-- ?v= is the deploy's asset version; the reasoning is set out above the
+     script tags at the end of the document. Bump both together. -->
+<link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+<header>
+  <h1 data-i18n="app.name">Xiangqi</h1>
+  <!-- The English text inside is the first-paint and no-script fallback; i18n.js
+       replaces it from the active locale, markup included. -->
+  <p class="tagline" data-i18n-html="app.tagline">
+    Playing against the <strong>godogpaw</strong> engine, with
+    <a href="https://www.chessdb.cn/cloudbook_api_en.html" target="_blank" rel="noreferrer">chessdb.cn</a>
+    as its opening book.
+  </p>
+</header>
+
+<main>
+  <section class="board-panel">
+    <canvas id="board" aria-label="Xiangqi board" data-i18n-attr="aria-label:board.label"></canvas>
+    <p id="status" class="status" role="status" data-i18n="status.loading">Loading…</p>
+
+    <div class="controls">
+      <button id="new-game" type="button" data-i18n="button.newGame">New game</button>
+      <button id="undo" type="button" data-i18n="button.undo">Undo</button>
+      <button id="hint" type="button" data-i18n="button.hint">Hint</button>
+    </div>
+
+    <div class="settings">
+      <!-- The language picker comes first because it is the one control whose
+           purpose survives being unreadable: it is how a player who landed in a
+           language they do not read gets out again.
+           The options are written by renderLocaleOptions() from SUPPORTED_LOCALES,
+           not marked up here, because a locale's label is its own name and must
+           never be translated — one list, so the labels cannot drift apart. -->
+      <label for="locale" data-i18n="settings.language">Language</label>
+      <select id="locale"></select>
+
+      <label for="side" data-i18n="settings.playAs">Play as</label>
+      <select id="side">
+        <option value="0" data-i18n="settings.sideRed">Red (first)</option>
+        <option value="1" data-i18n="settings.sideBlack">Black (second)</option>
+      </select>
+
+      <label for="level" data-i18n="settings.level">Level</label>
+      <!-- A level is a name and nothing else: it is all a page sends, all the
+           server reports back, and all a translation names. What a name resolves
+           to — its search depth and how wide its window is — lives in
+           internal/game/levels.go, so retuning the ladder is an edit there and
+           never an edit here.
+
+           The values are the names the server defines. The labels are written by
+           renderLevelOptions() from each option's own value, so the level named
+           and the level sent cannot disagree. The text below is only what shows
+           before the script runs. -->
+      <select id="level">
+        <option value="beginner">Beginner</option>
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+        <option value="master">Master</option>
+      </select>
+
+      <!-- The text is in its own span: data-i18n replaces an element's
+           contents, and this label has to keep its checkbox. -->
+      <label class="checkbox">
+        <input id="use-book" type="checkbox" checked>
+        <span data-i18n="settings.useBook">Use the opening book</span>
+      </label>
+    </div>
+    <p class="note" data-i18n="settings.bookNote">
+      In the opening the book supplies the moves the computer chooses among, at
+      every level, so even the easiest level opens with moves a player would
+      recognize.
+    </p>
+  </section>
+
+  <aside class="analysis">
+    <h2 data-i18n="analysis.heading">Analysis</h2>
+    <p id="ai-move" class="ai-move"></p>
+
+    <dl class="facts">
+      <dt data-i18n="analysis.cloudBest">Cloud best</dt><dd id="cloud-best">—</dd>
+      <dt data-i18n="analysis.cloudEval">Cloud eval</dt><dd id="cloud-eval">—</dd>
+      <dt data-i18n="analysis.cloudDepth">Cloud depth</dt><dd id="cloud-depth">—</dd>
+    </dl>
+
+    <h3 data-i18n="analysis.topMoves">Top book moves</h3>
+    <p id="pov" class="note"></p>
+    <table id="moves">
+      <thead>
+        <tr>
+          <th data-i18n="table.move">Move</th>
+          <th data-i18n="table.score">Score</th>
+          <th data-i18n="table.winrate">Win&nbsp;%</th>
+          <th data-i18n="table.note">Note</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="analysis-note" class="note"></p>
+
+    <h3 data-i18n="analysis.pv">Principal variation</h3>
+    <p id="pv" class="pv">—</p>
+  </aside>
+</main>
+
+<!-- The locale tables load before i18n.js and app.js: they are plain globals, so
+     there is no fetch and no window where the interface is drawn without words.
+     The order below is load-bearing for the same reason: the tables register
+     themselves onto one global, and i18n.js reads it. -->
+<!-- The ?v= token is the deploy's asset version, and every local asset carries
+     the same one.
+
+     It exists because a cache keyed by URL is only as fresh as the URL. A CDN
+     in front of this server, or a browser with no validator to revalidate
+     against, will keep answering a given URL from what it already holds, and
+     the result is a page assembled from two different builds — which is exactly
+     how this interface once came to show an empty language picker: fresh HTML
+     naming an element that the cached script, from before that element existed,
+     never filled.
+
+     Bumping the token renames every asset at once, so the host has never seen
+     the URLs and cannot answer them from cache. It costs nothing while the
+     files are unchanged, and it is worth doing whenever they are not.
+
+     It is a plain counter rather than a date or a build stamp, because the only
+     thing it has to be is different: a date cannot tell two deploys on one day
+     apart, and that is the common case while a change is being finished.
+
+     This is belt-and-braces, not the primary defence: the server sends
+     Cache-Control: no-store for these files, which stops a conforming cache
+     storing them in the first place. The token covers the copies already out
+     there, and the caches that ignore the header. -->
+<script src="locales/en.js?v=3"></script>
+<script src="locales/vi.js?v=3"></script>
+<script src="locales/zh-Hans.js?v=3"></script>
+<script src="i18n.js?v=3"></script>
+<script src="board.js?v=3"></script>
+<script src="app.js?v=3"></script>
+</body>
+</html>

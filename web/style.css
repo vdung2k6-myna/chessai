@@ -1,0 +1,218 @@
+:root {
+  --bg: #17181c;
+  --panel: #212228;
+  --panel-edge: #33353d;
+  --ink: #e8e6e1;
+  --ink-dim: #9b9a95;
+  --accent: #d8a13a;
+  --red: #d9534f;
+  --ok: #4f9d69;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 16px 48px;
+  background: var(--bg);
+  color: var(--ink);
+  /* The CJK face comes after the generic, not before it.
+     Vietnamese is written in Latin letters with five kinds of diacritic —
+     ế ộ ữ ằ ỹ — and a CJK face listed first would be chosen for that Latin
+     text, where its diacritics are missing or badly placed. A browser falls
+     back per glyph rather than per string, so Chinese characters still reach
+     "Microsoft YaHei" without it being promoted above the Latin faces.
+     The board's own glyphs do not use this stack at all: board.js sets the
+     canvas font separately. */
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif, "Microsoft YaHei";
+}
+
+header {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 0 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+}
+
+.tagline {
+  margin: 6px 0 0;
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+.tagline a { color: var(--accent); }
+
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(300px, 560px) minmax(280px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  main { grid-template-columns: 1fr; }
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.status {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: var(--panel);
+  border-left: 3px solid var(--panel-edge);
+  font-size: 14px;
+  min-height: 42px;
+}
+
+.status.your-turn { border-left-color: var(--ok); }
+.status.thinking  { border-left-color: var(--accent); }
+.status.over      { border-left-color: var(--red); }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-edge);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-edge);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+}
+
+.checkbox { display: flex; align-items: center; gap: 6px; }
+
+.note {
+  margin: 10px 0 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+}
+
+.analysis {
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+}
+
+.analysis h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+}
+
+.analysis h3 {
+  margin: 20px 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+}
+
+.ai-move {
+  margin: 0;
+  font-size: 14px;
+  min-height: 22px;
+}
+
+.badge {
+  display: inline-block;
+  /* The badges are separate elements now rather than words inside one string, so
+     the gap between them has to be a margin rather than a space character. */
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  vertical-align: 1px;
+}
+
+.badge.book   { background: rgba(216, 161, 58, 0.18); color: var(--accent); }
+.badge.search { background: rgba(79, 157, 105, 0.18); color: var(--ok); }
+.badge.warn   { background: rgba(217, 83, 79, 0.18);  color: var(--red); }
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.facts dt { color: var(--ink-dim); }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink-dim);
+  padding: 4px 6px 4px 0;
+  border-bottom: 1px solid var(--panel-edge);
+}
+
+td {
+  padding: 4px 6px 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+td.move { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+
+.pv {
+  margin: 0;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  color: var(--ink-dim);
+  word-break: break-all;
+}
